@@ -18,5 +18,8 @@ test('renderiza a lista de ferramentas', () => {
   expect(screen.getByText(/ESLint/i)).toBeInTheDocument();
   expect(screen.getByText(/Prettier/i)).toBeInTheDocument();
   expect(screen.getByText(/Jest/i)).toBeInTheDocument();
-  expect(screen.getByText(/GitHub Actions/i)).toBeInTheDocument();
+  
+  // Usar getAllByText em vez de getByText para múltiplos elementos
+  const githubActionsElements = screen.getAllByText(/GitHub Actions/i);
+  expect(githubActionsElements.length).toBeGreaterThan(0);
 });
