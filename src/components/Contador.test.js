@@ -71,7 +71,7 @@ describe('Componente Contador', () => {
 
   test('todos os botões estão presentes', () => {
     render(<Contador />);
-    
+
     expect(screen.getByLabelText('Incrementar')).toBeInTheDocument();
     expect(screen.getByLabelText('Decrementar')).toBeInTheDocument();
     expect(screen.getByLabelText('Resetar')).toBeInTheDocument();

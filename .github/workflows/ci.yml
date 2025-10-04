@@ -1,0 +1,140 @@
+name: CI/CD Pipeline
+
+# Quando executar
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Job de Qualidade de Código
+  qualidade:
+    name: 🔍 Verificar Qualidade
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Checkout do código
+      - name: 📥 Checkout código
+        uses: actions/checkout@v3
+      
+      # 2. Configurar Node.js
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      # 3. Instalar dependências
+      - name: 📦 Instalar dependências
+        run: npm ci
+      
+      # 4. Verificar formatação com Prettier
+      - name: 🎨 Verificar formatação (Prettier)
+        run: npm run format:check
+      
+      # 5. Verificar código com ESLint
+      - name: 🔍 Lint do código (ESLint)
+        run: npm run lint
+
+  # Job de Testes
+  testes:
+    name: 🧪 Executar Testes
+    runs-on: ubuntu-latest
+    needs: qualidade
+    
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v3
+      
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: 📦 Instalar dependências
+        run: npm ci
+      
+      - name: 🧪 Executar testes
+        run: npm run test:coverage
+      
+      - name: 📊 Upload coverage para Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/coverage-final.json
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+  # Job de Build
+  build:
+    name: 🏗️ Build do Projeto
+    runs-on: ubuntu-latest
+    needs: [qualidade, testes]
+    
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v3
+      
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: 📦 Instalar dependências
+        run: npm ci
+      
+      - name: 🏗️ Build da aplicação
+        run: npm run build
+      
+      - name: 📤 Upload artifact do build
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-files
+          path: build/
+          retention-days: 3
+
+  # Job de Deploy (opcional - para GitHub Pages)
+  deploy:
+    name: 🚀 Deploy GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v3
+      
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: 📦 Instalar dependências
+        run: npm ci
+      
+      - name: 🏗️ Build da aplicação
+        run: npm run build
+      
+      - name: 📄 Setup Pages
+        uses: actions/configure-pages@v3
+      
+      - name: 📤 Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: './build'
+      
+      - name: 🚀 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2

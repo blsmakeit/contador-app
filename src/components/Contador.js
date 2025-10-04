@@ -23,22 +23,22 @@ const Contador = ({ inicial = 0, passo = 1 }) => {
         <h1 data-testid="contador-valor">{contador}</h1>
       </div>
       <div className="contador-botoes">
-        <button 
-          onClick={decrementar} 
+        <button
+          onClick={decrementar}
           aria-label="Decrementar"
           className="btn btn-decrementar"
         >
           -
         </button>
-        <button 
-          onClick={resetar} 
+        <button
+          onClick={resetar}
           aria-label="Resetar"
           className="btn btn-resetar"
         >
           Reset
         </button>
-        <button 
-          onClick={incrementar} 
+        <button
+          onClick={incrementar}
           aria-label="Incrementar"
           className="btn btn-incrementar"
         >
