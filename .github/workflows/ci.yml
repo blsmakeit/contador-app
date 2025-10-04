@@ -66,39 +66,41 @@ jobs:
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
-  # Job do build
+
+  # Job de Build
   build:
-      name: 🏗️ Build do Projeto
-      runs-on: ubuntu-latest
-      needs: [qualidade, testes]
+    name: 🏗️ Build do Projeto
+    runs-on: ubuntu-latest
+    needs: [qualidade, testes]
+    
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v3
       
-      steps:
-        - name: 📥 Checkout código
-          uses: actions/checkout@v3
-        
-        - name: 🔧 Setup Node.js
-          uses: actions/setup-node@v3
-          with:
-            node-version: '18'
-            cache: 'npm'
-        
-        - name: 📦 Instalar dependências
-          run: npm ci
-        
-        - name: 🏗️ Build da aplicação
-          run: npm run build
-        
-        - name: 📤 Upload artifact do build
-          uses: actions/upload-artifact@v4  # Mudou de v3 para v4
-          with:
-            name: build-files
-            path: build/
-            retention-days: 3
-# Job de Deploy (opcional - para GitHub Pages)
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: 📦 Instalar dependências
+        run: npm ci
+      
+      - name: 🏗️ Build da aplicação
+        run: npm run build
+      
+      - name: 📤 Upload artifact do build
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-files
+          path: build/
+          retention-days: 3
+
+  # Job de Deploy (para GitHub Pages)
   deploy:
     name: 🚀 Deploy GitHub Pages
     runs-on: ubuntu-latest
-    needs: build
+    needs: [qualidade, testes]  # Mudança aqui - não depende do build
     if: github.ref == 'refs/heads/main'
     permissions:
       contents: read
@@ -124,15 +126,17 @@ jobs:
       
       - name: 🏗️ Build da aplicação
         run: npm run build
+        env:
+          PUBLIC_URL: /contador-app
       
       - name: 📄 Setup Pages
         uses: actions/configure-pages@v3
       
       - name: 📤 Upload artifact
-        uses: actions/upload-pages-artifact@v3  # Mudou de v2 para v3
+        uses: actions/upload-pages-artifact@v3
         with:
           path: './build'
       
       - name: 🚀 Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v3  # Mudou de v2 para v3
+        uses: actions/deploy-pages@v3
