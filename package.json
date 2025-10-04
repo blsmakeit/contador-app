@@ -1,6 +1,7 @@
 {
   "name": "contador-app",
   "version": "0.1.0",
+  "homepage": "https://blsmakeit.github.io/contador-app",
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.1",
